@@ -1,12 +1,12 @@
 /*!
- * Webim v1.0.0pre
+ * Webim v1.0.0
  * http://www.webim20.cn/
  *
  * Copyright (c) 2010 Hidden
  * Released under the MIT, BSD, and GPL Licenses.
  *
- * Date: Sat Aug 21 20:03:19 2010 +0800
- * Commit: 8fd80daf892b99bb18815d29c95e941ede8d6248
+ * Date: Sat Aug 28 19:43:13 2010 +0800
+ * Commit: 79741a1eb92f3c500f7e09ceb6437cb45b74a244
  */
 (function(window, document, undefined){
 
@@ -984,17 +984,22 @@ function webim(element, options){
 }
 
 extend(webim.prototype, objectExtend,{
-	_init:function(){
+	_init: function(){
 		var self = this;
-		self.data = {user:{}};
+		//Default user status info.
+		var user = {presence: 'offline', show: 'unavailable'};
+		self.data = {user: user};
 		self.status = new webim.status();
 		self.setting = new webim.setting();
 		self.buddy = new webim.buddy(null, {loadDelay: !self.status.get("b")});
-		self.room = new webim.room();
-		self.history = new webim.history();
+		self.room = new webim.room(null, {user: user});
+		self.history = new webim.history(null, {user: user});
 		self.connection = new comet(null,{jsonp:true});
 		self._initEvents();
 		//self.online();
+	},
+	user: function(info){
+		extend(this.data.user, info);
 	},
 	_ready: function(post_data){
 		var self = this;
@@ -1017,7 +1022,7 @@ extend(webim.prototype, objectExtend,{
 			history.init("unicast", v.id, v.history);
 		});
 		buddy.online(ids);
-		buddy.handle(data.buddies);
+		buddy.handle(buddies);
 		//rooms
 		each(data.rooms, function(n, v){
 			history.init("multicast", v.id, v.history);
@@ -1029,7 +1034,9 @@ extend(webim.prototype, objectExtend,{
 		});
 		room.handle(roomData);
 		room.options.ticket = data.connection.ticket;
-		//handle new messages
+		self.trigger("go",[data]);
+		self.connection.connect(data.connection);
+		//handle new messages at last
 		var n_msg = data.new_messages;
 		if(n_msg && n_msg.length){
 			each(n_msg, function(n, v){
@@ -1037,8 +1044,6 @@ extend(webim.prototype, objectExtend,{
 			});
 			self.trigger("message",[n_msg]);
 		}
-		self.trigger("go",[data]);
-		self.connection.connect(data.connection);
 	},
 	_stop: function(msg){
 		var self = this;
@@ -1222,7 +1227,7 @@ function model(name, defaults, proto){
 window.webim = webim;
 
 extend(webim,{
-	version:"1.0.0pre",
+	version:"1.0.0",
 	defaults:{
 		urls:{
 			online: "webim/online",
@@ -1265,9 +1270,10 @@ extend(webim,{
 model("setting",{
 	url: "/webim/setting",
 	data: {
+		blocked_rooms: [],
 		play_sound:true,
 		buddy_sticky:true,
-		minimize_layout: false,
+		minimize_layout: true,
 		msg_auto_pop:true
 	}
 },{
@@ -1475,6 +1481,7 @@ model("buddy", {
 		if(ids.length){
 			var self = this, options = self.options;
 			ajax({
+				type: "get",
 				url: options.url,
 				cache: false,
 				dataType: "json",
@@ -1642,6 +1649,7 @@ model("buddy", {
 		loadMember: function(id){
 			var self = this, options = self.options;
 			ajax({
+				type: "get",
 				cache: false,
 				url: options.urls.member,
 				dataType: "json",
@@ -1654,10 +1662,12 @@ model("buddy", {
 				}
 			});
 		},
-		join:function(id,user){
-			var self = this, options = self.options;
+		join:function(id){
+			var self = this, options = self.options, user = options.user;
+
 			ajax({
 				cache: false,
+				type: "post",
 				url: options.urls.join,
 				dataType: "json",
 				data: {
@@ -1672,12 +1682,13 @@ model("buddy", {
 				}
 			});
 		},
-		leave: function(id,user){
-			var self = this, options = self.options, d = self.dataHash[id];
+		leave: function(id){
+			var self = this, options = self.options, d = self.dataHash[id], user = options.user;
 			if(d){
 				d.initMember = false;
 				ajax({
 					cache: false,
+					type: "post",
 					url: options.urls.leave,
 					data: {
 						ticket: options.ticket,
@@ -1764,6 +1775,7 @@ model("history",{
 		self.trigger("clear", [type, id]);
 		ajax({
 			url: options.urls.clear,
+			type: "post",
 			cache: false,
 			//dataType: "json",
 			data:{ type: type, id: id}
@@ -1782,6 +1794,7 @@ model("history",{
 		ajax({
 			url: options.urls.load,
 			cache: false,
+			type: "get",
 			dataType: "json",
 			data:{type: type, id: id},
 			//context: self,
@@ -1793,14 +1806,14 @@ model("history",{
 });
 })(window, document);
 /*!
- * Webim UI v1.0.0pre
+ * Webim UI v3.0.0
  * http://www.webim20.cn/
  *
  * Copyright (c) 2010 Hidden
  * Released under the MIT, BSD, and GPL Licenses.
  *
- * Date: Mon Aug 23 18:01:36 2010 +0800
- * Commit: 8a2965cf8b86eb8276392793f26c3ca604cbf1c0
+ * Date: Sat Aug 28 19:45:39 2010 +0800
+ * Commit: 7ceb7da5074330c9d143065ab255fcadc423c909
  */
 (function(window,document,undefined){
 
@@ -2311,10 +2324,10 @@ extend(webimUI.prototype, objectExtend, {
 			self._initStatus();
 			//setting.set(data.setting);
 		}).bind("stop", function(type){
-			layout.changeState("stop");
 			//hide(layout.widget("room").window.element);
 			type == "offline" && layout.removeAllChat();
 			layout.updateAllChat();
+			layout.changeState("stop");
 		});
 		//setting events
 		setting.bind("update",function(key, val){
@@ -2430,7 +2443,7 @@ extend(webimUI.prototype, objectExtend, {
 		a = status.get("a");
 
 		tabIds && tabIds.length && tabs && each(tabs, function(k,v){
-			var id = k.slice(2), type = k[0];
+			var id = k.slice(2), type = k.slice(0,1);
 			self.addChat(type, id, {}, { isMinimize: true});
 			layout.chat(k).window.notifyUser("information", v["n"]);
 		});
@@ -2624,7 +2637,7 @@ function app(name, events){
 	webimUI.apps[name] = events || {};
 }
 extend(webimUI,{
-	version: "1.0.0pre",
+	version: "3.0.0",
 	widget: widget,
 	app: app,
 	plugin: plugin,
@@ -3227,7 +3240,14 @@ widget("layout",{
 	},
 	_initEvents: function(){
 		var self = this, win = self.window, $ = self.$;
-		addEvent(win,"resize", function(){self.buildUI();});
+		//Ie will call resize events after onload.
+		var c = false;
+		addEvent(win,"resize", function(){
+			if(c){
+				c = true;
+				self.buildUI();
+			}
+		});
 		addEvent($.next,"mousedown", function(){self._slide(-1);});
 		addEvent($.next,"mouseup", function(){self._slideUp();});
 		disableSelection($.next);
@@ -3235,11 +3255,15 @@ widget("layout",{
 		addEvent($.prev,"mouseup", function(){self._slideUp();});
 		disableSelection($.prev);
 		addEvent($.expand, "click", function(){
+			if(!self.isMinimize()) return false;
 			self.expand();
+			self.trigger("expand");
 			return false;
 		});
 		addEvent($.collapse, "click", function(){
+			if(self.isMinimize()) return false;
 			self.collapse();
+			self.trigger("collapse");
 			return false;
 		});
 		hoverClass($.collapse, "ui-state-hover", "ui-state-default");
@@ -3252,13 +3276,11 @@ widget("layout",{
 		var self = this;
 		if(self.isMinimize()) return;
 		addClass(this.$.layout, "webim-layout-minimize");
-		self.trigger("collapse");
 	},
 	expand: function(){
 		var self = this;
 		if(!self.isMinimize()) return;
 		removeClass(self.$.layout, "webim-layout-minimize");
-		self.trigger("expand");
 	},
 	_displayUpdate:function(e){
 		this._ready && this.trigger("displayUpdate");
@@ -3356,7 +3378,8 @@ widget("layout",{
 		if(!panels[id]){
 			var win = self.tabs[id] = new webimUI.window(null, extend({
 				isMinimize: self.activeTabId || !self.options.chatAutoPop,
-				tabWidth: self.tabWidth -2
+				tabWidth: self.tabWidth -2,
+				titleVisibleLength: 9
 			},winOptions)).bind("close", function(){ self._onChatClose(id)}).bind("displayStateChange", function(state){ self._onChatChange(id,state)});
 			self.tabIds.push(id);
 			self.$.tabs.insertBefore(win.element, self.$.tabs.firstChild);
@@ -4108,6 +4131,9 @@ widget("setting",{
 	template: function(){
 		var self = this, temp = [], data = self.options.data;
 		data && each(data, function(key, val){
+			if(val && typeof val != "boolean") {
+				return;
+			}
 			temp.push(self._check_tpl(key, val));
 		});
 		return tpl(self.options.template,{
@@ -4158,7 +4184,7 @@ widget("setting",{
 			return;
 		}
 		var $ = self.$, tag = $[name];
-		if(isChecked && typeof isChecked == "boolean") {
+		if(isChecked && typeof isChecked != "boolean") {
 			return;
 		}
 		if(tag){
@@ -4211,7 +4237,7 @@ widget("user",{
 		});
 	},
 	update: function(info){
-		var self = this, type = info.show || "available", $ = self.$;
+		var self = this, type = info.show || "unavailable", $ = self.$;
 		self.options.info = info;
 		$.userStatus.innerHTML = info.status || i18n(type);
 		$.userNick.innerHTML = info.nick || "";
@@ -4333,6 +4359,7 @@ app("buddy", {
 		}).bind("presence", function(params){
 			im.sendPresence(params);
 		});
+		buddyUI.user.update(im.data.user);
 	},
 	ready: function(){
 		var ui = this, im = ui.im, buddy = im.buddy, buddyUI = ui.buddy;
@@ -4340,7 +4367,6 @@ app("buddy", {
 	},
 	go: function(){
 		var ui = this, im = ui.im, buddy = im.buddy, buddyUI = ui.buddy;
-		!buddyUI.window.isMinimize() && buddy.loadDelay();
 		buddyUI.notice("count", buddy.count({presence:"online"}));
 		buddyUI.user.update(im.data.user);
 	},
@@ -4617,11 +4643,11 @@ app("room",{
 		}).bind("block", function(id, list){
 			setting.set("blocked_rooms",list);
 			updateRoom(room.get(id));
-			room.leave(id,u);
+			room.leave(id);
 		}).bind("unblock", function(id, list){
 			setting.set("blocked_rooms",list);
 			updateRoom(room.get(id));
-			room.join(id,u);
+			room.join(id);
 		}).bind("addMember", function(room_id, info){
 			var c = layout.chat("room", room_id);
 			c && c.addMember(info.id, info.nick, info.id == im.data.user.id);

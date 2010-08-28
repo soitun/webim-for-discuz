@@ -1,12 +1,12 @@
 /*!
- * Webim UI v1.0.0pre
+ * Webim UI v3.0.0
  * http://www.webim20.cn/
  *
  * Copyright (c) 2010 Hidden
  * Released under the MIT, BSD, and GPL Licenses.
  *
- * Date: Mon Aug 23 18:01:36 2010 +0800
- * Commit: 8a2965cf8b86eb8276392793f26c3ca604cbf1c0
+ * Date: Sat Aug 28 19:45:39 2010 +0800
+ * Commit: 7ceb7da5074330c9d143065ab255fcadc423c909
  */
 
 body {
@@ -32,7 +32,7 @@ body {
         text-decoration: none;
 }
 .webim a:hover{
-        text-decoration: underline;
+        text-decoration: none;
 }
 .webim h4{
         font-size: 1em;
@@ -62,7 +62,7 @@ a .webim-icon, a .ui-icon{
 }
 
 /*
- * jQuery UI CSS Framework 1.0.0pre
+ * jQuery UI CSS Framework 3.0.0
  *
  * Copyright 2010, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -579,15 +579,7 @@ a .webim-icon, a .ui-icon{
 	float: left;
 }
 /* end */
-.webim-state-stop{
-        left:auto;
-        right:0;
-}
-.webim-state-stop .webim-widgets{
-        right:0;
-}
-.webim-state-stop .webim-pannels{
-}
+
 
 /**/
 .webim .webim-chat .webim-chat-header{
