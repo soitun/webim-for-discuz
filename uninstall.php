@@ -13,11 +13,11 @@ require('runquery.php');
 
 $sql = <<<EOF
 
-DROP TABLE cdb_webim_settings;
-DROP TABLE cdb_webim_histories;
+DROP TABLE IF EXISTS cdb_webim_settings;
+DROP TABLE IF EXISTS cdb_webim_histories;
 
 EOF;
 
-runquery2($sql, UC_DBTABLEPRE);
+#runquery2($sql, UC_DBTABLEPRE);
 
 $finish = TRUE;
