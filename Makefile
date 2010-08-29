@@ -1,43 +1,56 @@
-PREFIX = .
-STATIC_DIR = ${PREFIX}/static
-STATIC_SRC_DIR = ${PREFIX}/static_src/dist
+#Release webim
 
-STATIC_SRC_FILES = ${STATIC_SRC_DIR}/images \
-		   ${STATIC_SRC_DIR}/assets \
-		   ${STATIC_SRC_DIR}/themes \
-		   ${STATIC_SRC_DIR}/i18n 
+PRIFIX= .
+SRC_DIR= ${PRIFIX}
+DIST_DIR= ${PRIFIX}/dist
+LIB_DIR= ${PRIFIX}/lib
+VERSION= 3.0beta
+PRODUCT_NAME= discuz
+CACHE_DIR= ${PRIFIX}/webim
+REL_FILE = ${DIST_DIR}/WebIM_For_${PRODUCT_NAME}-${VERSION}.zip
+CONFIG_FILE= ${SRC_DIR}/discuz_plugin_webim.xml
+REPLACE_VER= sed s/@VERSION/${VERSION}/
 
-all: submake static debug
-	@@echo "complete."
+SRC_FILES = ${SRC_DIR}/*.php \
+	    ${SRC_DIR}/*.md \
+	    ${SRC_DIR}/lib \
+	    ${SRC_DIR}/static \
+	    ${SRC_DIR}/template \
 
-submake:
-	cd static_src && $(MAKE)
-static: 
-	@@mkdir -p ${STATIC_DIR}
-	@@cp -r ${STATIC_SRC_FILES} ${STATIC_DIR} 
+all: ${REL_FILE}
+	@@echo "Build complete."
 
-	@@cp ${STATIC_SRC_DIR}/webim.min.css ${STATIC_DIR}/webim.min.css
-	@@cp ${STATIC_SRC_DIR}/webim_uc.min.css ${STATIC_DIR}/webim_uchome.min.css
-	@@cp ${STATIC_SRC_DIR}/webim_dz.min.css ${STATIC_DIR}/webim_discuz.min.css
+${REL_FILE}: ${DIST_DIR} ${CACHE_DIR}
+	@@echo "Zip ${REL_FILE}"
+	@@zip -r -q ${REL_FILE} ${CACHE_DIR}
 
-	@@cp ${STATIC_SRC_DIR}/webim.all.min.js ${STATIC_DIR}/webim.all.min.js
-	@@cp ${STATIC_SRC_DIR}/webim_dz.all.min.js ${STATIC_DIR}/webim_discuz.all.min.js
-	@@cp ${STATIC_SRC_DIR}/webim_uc.all.min.js ${STATIC_DIR}/webim_uchome.all.min.js
+${CACHE_DIR}: ${LIB_DIR}/webim.class.php
+	@@echo "Create cache directory"
+	@@mkdir -p ${CACHE_DIR}
+	@@echo "Copy source"
+	@@cp -r ${SRC_FILES} ${CACHE_DIR}
+	@@rm -rf ${CACHE_DIR}/lib/.git
+	@@echo "Change version"
+	@@cat ${SRC_DIR}/config.php | ${REPLACE_VER} > ${CACHE_DIR}/config.php
+	@@cat ${SRC_DIR}/webim.class.php | ${REPLACE_VER} > ${CACHE_DIR}/webim.class.php
+	@@echo "Convert charset"
+	@@cat ${CONFIG_FILE} | ${REPLACE_VER} > ${CACHE_DIR}/discuz_plugin_webim_SC_UTF8.xml
+	@@iconv -f UTF-8 -t GBK ${CONFIG_FILE} | ${REPLACE_VER} > ${CACHE_DIR}/discuz_plugin_webim_SC_GBK.xml
+	@@iconv -f UTF-8 -t GB2312 ${CONFIG_FILE} | ${REPLACE_VER} | iconv -f GB2312 -t BIG5 > ${CACHE_DIR}/discuz_plugin_webim_TC_BIG5.xml
+	@@iconv -f UTF-8 -t GB2312 ${CONFIG_FILE} | ${REPLACE_VER} | iconv -f GB2312 -t BIG5 | iconv -f BIG5 -t UTF-8 > ${CACHE_DIR}/discuz_plugin_webim_TC_UTF8.xml
 
-debug:  
-	@@mkdir -p ${STATIC_DIR}
-	@@cp -r ${STATIC_SRC_FILES} ${STATIC_DIR} 
-	@@cp ${STATIC_SRC_DIR}/webim.css ${STATIC_DIR}/webim.all.css
-	@@cp ${STATIC_SRC_DIR}/webim_uc.css ${STATIC_DIR}/webim_uchome.all.css
-	@@cp ${STATIC_SRC_DIR}/webim_dz.css ${STATIC_DIR}/webim_discuz.all.css
+${DIST_DIR}:
+	@@echo "Create distribution directory"
+	@@mkdir -p ${DIST_DIR}
+	@@echo "	"${DIST_DIR}
 
-	@@cp ${STATIC_SRC_DIR}/webim.all.js ${STATIC_DIR}/webim.all.js
-	@@cp ${STATIC_SRC_DIR}/webim_uc.all.js ${STATIC_DIR}/webim_uchome.all.js
-	@@cp ${STATIC_SRC_DIR}/webim_dz.all.js ${STATIC_DIR}/webim_discuz.all.js
-	@@echo "debug complete."
+${LIB_DIR}/webim.class.php:
+	@@git submodule update --init lib
 
 clean:
-	find ./ -name  "dist" | xargs rm -rf
-	@@echo "Removing Distribution directory:" ${STATIC_DIR}
-	@@rm -rf ${STATIC_DIR}
+	@@echo "Remove release cache and dist directory"
+	@@rm -rf ${DIST_DIR}
+	@@rm -rf ${CACHE_DIR}
+	@@echo "	"${DIST_DIR}
+	@@echo "	"${CACHE_DIR}
 
