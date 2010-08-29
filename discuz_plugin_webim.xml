@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<root>
+	<item id="Title"><![CDATA[Discuz! Plugin]]></item>
+	<item id="Version"><![CDATA[7.0]]></item>
+	<item id="Time"><![CDATA[2010-08-23 21:59]]></item>
+	<item id="Data">
+		<item id="plugin">
+			<item id="available"><![CDATA[1]]></item>
+			<item id="adminid"><![CDATA[0]]></item>
+			<item id="name"><![CDATA[webim]]></item>
+			<item id="identifier"><![CDATA[webim]]></item>
+			<item id="description"><![CDATA[]]></item>
+			<item id="datatables"><![CDATA[]]></item>
+			<item id="directory"><![CDATA[webim/]]></item>
+			<item id="copyright"><![CDATA[webim20.cn]]></item>
+			<item id="version"><![CDATA[@VERSION]]></item>
+			<item id="__modules">
+				<item id="0">
+					<item id="name"><![CDATA[themes]]></item>
+					<item id="menu"><![CDATA[主题选择]]></item>
+					<item id="url"><![CDATA[]]></item>
+					<item id="type"><![CDATA[3]]></item>
+					<item id="adminid"><![CDATA[0]]></item>
+					<item id="displayorder"><![CDATA[0]]></item>
+				</item>
+				<item id="1">
+					<item id="name"><![CDATA[webim]]></item>
+					<item id="menu"><![CDATA[]]></item>
+					<item id="url"><![CDATA[]]></item>
+					<item id="type"><![CDATA[11]]></item>
+					<item id="adminid"><![CDATA[0]]></item>
+					<item id="displayorder"><![CDATA[0]]></item>
+				</item>
+			</item>
+		</item>
+		<item id="version"><![CDATA[7.0]]></item>
+		<item id="vars">
+			<item id="0">
+				<item id="displayorder"><![CDATA[1]]></item>
+				<item id="title"><![CDATA[注册域名]]></item>
+				<item id="description"><![CDATA[在线版用户输入在webim20.cn中注册的域名]]></item>
+				<item id="variable"><![CDATA[domain]]></item>
+				<item id="type"><![CDATA[text]]></item>
+				<item id="value"><![CDATA[]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+			<item id="1">
+				<item id="displayorder"><![CDATA[2]]></item>
+				<item id="title"><![CDATA[注册apikey]]></item>
+				<item id="description"><![CDATA[域名对应的apikey]]></item>
+				<item id="variable"><![CDATA[apikey]]></item>
+				<item id="type"><![CDATA[text]]></item>
+				<item id="value"><![CDATA[]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+			<item id="2">
+				<item id="displayorder"><![CDATA[3]]></item>
+				<item id="title"><![CDATA[IM服务器]]></item>
+				<item id="description"><![CDATA[]]></item>
+				<item id="variable"><![CDATA[host]]></item>
+				<item id="type"><![CDATA[text]]></item>
+				<item id="value"><![CDATA[webim20.cn]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+			<item id="3">
+				<item id="displayorder"><![CDATA[4]]></item>
+				<item id="title"><![CDATA[IM服务器端口]]></item>
+				<item id="description"><![CDATA[]]></item>
+				<item id="variable"><![CDATA[port]]></item>
+				<item id="type"><![CDATA[text]]></item>
+				<item id="value"><![CDATA[8000]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+			<item id="4">
+				<item id="displayorder"><![CDATA[5]]></item>
+				<item id="title"><![CDATA[主题]]></item>
+				<item id="description"><![CDATA[在主题选择功能里选择主题]]></item>
+				<item id="variable"><![CDATA[theme]]></item>
+				<item id="type"><![CDATA[text]]></item>
+				<item id="value"><![CDATA[base]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+			<item id="5">
+				<item id="displayorder"><![CDATA[6]]></item>
+				<item id="title"><![CDATA[本地语言]]></item>
+				<item id="description"><![CDATA[]]></item>
+				<item id="variable"><![CDATA[local]]></item>
+				<item id="type"><![CDATA[select]]></item>
+				<item id="value"><![CDATA[zh-CN]]></item>
+				<item id="extra"><![CDATA[zh-CN = 简体中文
+					zh-TW = 繁体中文
+					en = English]]></item>
+			</item>
+			<item id="6">
+				<item id="displayorder"><![CDATA[7]]></item>
+				<item id="title"><![CDATA[表情]]></item>
+				<item id="description"><![CDATA[暂无其他表情可选，请不要修改此项]]></item>
+				<item id="variable"><![CDATA[emot]]></item>
+				<item id="type"><![CDATA[text]]></item>
+				<item id="value"><![CDATA[default]]></item>
+				<item id="extra"><![CDATA[]]></item>
+			</item>
+		</item>
+		<item id="intro"><![CDATA[webim是一个为Discuz用户打造的网页版及时聊天工具，用户通过聊天工具栏可随即与在线好友聊天。在线版用户安装后需要到webim20.cn注册一个apikey，配置后即可使用。更多帮助信息请访问 [url=http://www.webim20.cn]webim20.cn[/url]
+
+			[img]http://demo.webim20.cn/home/webim/static/images/webim.jpg[/img]
+			[img]http://demo.webim20.cn/home/webim/static/images/themes.jpg[/img]
+			]]></item>
+		<item id="installfile"><![CDATA[install.php]]></item>
+		<item id="uninstallfile"><![CDATA[uninstall.php]]></item>
+		<item id="language">
+			<item id="scriptlang">
+				<item id="example"><![CDATA[示例]]></item>
+			</item>
+			<item id="templatelang">
+				<item id="example"><![CDATA[示例]]></item>
+				<item id="themes_tips"><![CDATA[选择你喜欢的主题，点击便可立即更换]]></item>
+				<item id="themes_success"><![CDATA[主题更新成功，您可以更新DiscuzX页面查看效果。]]></item>
+			</item>
+		</item>
+	</item>
+</root>
