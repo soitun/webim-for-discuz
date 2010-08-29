@@ -100,7 +100,23 @@ function build_buddies($buddies) {
         $_buddies[]=array('id'=>$b->id,'show'=>$b->show,'need_reload'=>true,'presence'=>$b->presence);
     return $_buddies;
 }
-function complete_status($buddies){}
+
+function complete_status($members){
+	if(!empty($members)){
+		$num = count($members);
+		$ids = array();
+		$ob = array();
+		for($i = 0; $i < $num; $i++){
+			$m = $members[$i];
+			$id = $m->uid;
+			$ids[] = $id;
+			$ob[$id] = $m;
+			$m->status = "";
+		}
+	}
+	return $members;
+
+}
 
 function buddy($ids) {
     global $_SGLOBAL,$_IMC, $groups,$space;
