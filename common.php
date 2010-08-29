@@ -9,6 +9,10 @@ $_SGLOBAL['supe_uid']=  $discuz_uid;
 $_SGLOBAL['db']= $db;
 $_SC['charset'] = UC_CHARSET;
 
+$ucdb = new dbstuff;
+$ucdb->charset = UC_DBCHARSET;
+$ucdb->connect(UC_DBHOST, UC_DBUSER, UC_DBPW, UC_DBNAME);
+
 if( !function_exists('getspace') ) {
     function getspace($uid) {
         global $db;
@@ -29,12 +33,12 @@ if( !function_exists('tname') ) {
     }
 }
 function setting() {
-    global $_SGLOBAL,$_IMC,$space;
+    global $_SGLOBAL,$_IMC,$space, $ucdb;
     if(!empty($_SGLOBAL['supe_uid'])) {
-        $setting  = $_SGLOBAL['db']->fetch_array($_SGLOBAL['db']->query("SELECT * FROM ".im_tname('settings')." WHERE uid='$_SGLOBAL[supe_uid]'"));
+        $setting  = $ucdb->fetch_array($ucdb->query("SELECT * FROM ".im_tname('settings')." WHERE uid='$_SGLOBAL[supe_uid]'"));
         if(empty($setting)) {
             $setting = array('uid'=>$space['uid'],'web'=>"");
-            $_SGLOBAL['db']->query("INSERT INTO ".im_tname('settings')." (uid,web) VALUES ($_SGLOBAL[supe_uid],'')");
+            $ucdb->query("INSERT INTO ".im_tname('settings')." (uid,web) VALUES ($_SGLOBAL[supe_uid],'')");
         }
         $setting = $setting["web"];
     }
@@ -134,14 +138,14 @@ function buddy($ids) {
 }
 
 function find_new_message() {
-    global $_SGLOBAL,$_IMC,$space;
+    global $_SGLOBAL,$_IMC,$space, $ucdb;
     $uname = $space['username'];
     $messages = array();
-    $_SGLOBAL['db']->query("SET NAMES " . UC_DBCHARSET);
-    $query = $_SGLOBAL['db']->query("SELECT * FROM "
+    $ucdb->query("SET NAMES " . UC_DBCHARSET);
+    $query = $ucdb->query("SELECT * FROM "
             .im_tname('histories')
             ." WHERE `to`='$uname' and send = 0 ORDER BY timestamp DESC LIMIT 100");
-    while ($value = $_SGLOBAL['db']->fetch_array($query)) {
+    while ($value = $ucdb->fetch_array($query)) {
         array_unshift($messages,array('to'=>$value['to'],
                 'nick'=>$value['nick'],
                 'from'=>$value['from'],
@@ -154,17 +158,17 @@ function find_new_message() {
 }
 
 function new_message_to_histroy() {
-    global $_SGLOBAL,$_IMC,$space;
+    global $_SGLOBAL,$_IMC,$space, $ucdb;
     $uname = $space['username'];
 //    var_dump("UPDATE ".im_tname('histories')." SET send = 1 WHERE `to`='$uname' AND send = 0");
-    $_SGLOBAL['db']->query("UPDATE "
+    $ucdb->query("UPDATE "
             .im_tname('histories')
             ." SET send = 1 WHERE `to`='$uname' AND send = 0");
 }
 
 function find_history($ids,$type="unicast") {
-    global $_SGLOBAL,$_IMC,$space;
-    $_SGLOBAL['db']->query("SET NAMES " . UC_DBCHARSET);
+    global $_SGLOBAL,$_IMC,$space, $ucdb;
+    $ucdb->query("SET NAMES " . UC_DBCHARSET);
     $uname= $space['username'];
     $histories = array();
     $ids = ids_array($ids);
@@ -175,8 +179,8 @@ function find_history($ids,$type="unicast") {
        if($type=='multicast') {
             $q="SELECT * FROM ".im_tname('histories')
                     . " WHERE (`to`='$id') AND (`type`='multicast') AND send = 1 ORDER BY timestamp DESC LIMIT 30";
-            $query = $_SGLOBAL['db']->query($q);
-            while ($value = $_SGLOBAL['db']->fetch_array($query)) {
+            $query = $ucdb->query($q);
+            while ($value = $ucdb->fetch_array($query)) {
                 array_unshift($list,
                         array('to'=>to_utf8($value['to']),
                         'from'=>to_utf8($value['from']),
@@ -190,8 +194,8 @@ function find_history($ids,$type="unicast") {
             $q=  "SELECT main.* FROM "
                     . im_tname('histories')
                     . " main WHERE (`send`=1) AND ((`to`='$id' AND `from`='$uname' AND `fromdel` != 1) or (`from`='$id' AND `to`='$uname' AND `todel` != 1))  ORDER BY timestamp DESC LIMIT 30";
-            $query = $_SGLOBAL['db']->query($q);
-            while ($value = $_SGLOBAL['db']->fetch_array($query)) {
+            $query = $ucdb->query($q);
+            while ($value = $ucdb->fetch_array($query)) {
                 array_unshift($list,
                         array('to'=>to_utf8($value['to']),
                         'nick'=>to_utf8($value['nick']),
