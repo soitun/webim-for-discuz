@@ -1,4 +1,5 @@
 <?php
+exit('');
 include_once('common.php');
 include_once '../uc_client/client.php';
 $page = max($page, 1);

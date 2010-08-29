@@ -1,11 +1,10 @@
 <?php
-require 'lib/webim.class.php';
-include_once("lib/json.php");
-include_once 'config.php';
-require_once('../config.inc.php');
-define('DISCUZ_ROOT', substr(dirname(__FILE__), 0, -5));
-include_once(DISCUZ_ROOT.'include/common.inc.php');
+require_once('../../include/common.inc.php');
+require_once('lib/webim.class.php');
+require_once('lib/json.php');
+require_once('config.php');
 
+if(!$discuz_uid)exit('Login at first.');
 $_SGLOBAL['supe_uid']=  $discuz_uid;
 $_SGLOBAL['db']= $db;
 $_SC['charset'] = UC_CHARSET;
@@ -32,10 +31,10 @@ if( !function_exists('tname') ) {
 function setting() {
     global $_SGLOBAL,$_IMC,$space;
     if(!empty($_SGLOBAL['supe_uid'])) {
-        $setting  = $_SGLOBAL['db']->fetch_array($_SGLOBAL['db']->query("SELECT * FROM ".im_tname('setting')." WHERE uid='$_SGLOBAL[supe_uid]'"));
+        $setting  = $_SGLOBAL['db']->fetch_array($_SGLOBAL['db']->query("SELECT * FROM ".im_tname('settings')." WHERE uid='$_SGLOBAL[supe_uid]'"));
         if(empty($setting)) {
             $setting = array('uid'=>$space['uid'],'web'=>"");
-            $_SGLOBAL['db']->query("INSERT INTO ".im_tname('setting')." (uid,web) VALUES ($_SGLOBAL[supe_uid],'')");
+            $_SGLOBAL['db']->query("INSERT INTO ".im_tname('settings')." (uid,web) VALUES ($_SGLOBAL[supe_uid],'')");
         }
         $setting = $setting["web"];
     }
@@ -88,7 +87,7 @@ function ids_except($id, $ids) {
     return $ids;
 }
 function im_tname($name) {
-    return "`webim_".$name."`";
+    return UC_DBTABLEPRE."webim_".$name;
 }
 
 function build_buddies($buddies) {
@@ -208,7 +207,7 @@ function find_history($ids,$type="unicast") {
     return $list;
 }
 
-function nick($sp) {
+function nick($sp){
     global $_IMC;
     $_nick=(!$_IMC['show_realname']||empty($sp['name'])) ? $sp['username'] : $sp['name'];
     return to_unicode(to_utf8(($_nick)));

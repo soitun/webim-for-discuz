@@ -16,7 +16,7 @@ $setting = json_encode(setting());
 
 //custom
 (function(webim){
-    var path = "";
+    var path = "plugins/";
 
     var menu = webim.JSON.decode('<?php echo json_encode($menu) ?>');
 	webim.extend(webim.setting.defaults.data, webim.JSON.decode('<?php echo $setting ?>'));
