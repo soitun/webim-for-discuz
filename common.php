@@ -56,8 +56,8 @@ if( !function_exists('user_pic') ) {
 if(empty($space))exit();
 
 $user->uid =$space['uid'];
-$user->id = to_utf8($space['username']);
-$user->nick = to_utf8($space['username']);
+$user->id = $space['username'];
+$user->nick = $space['username'];
 $user->pic_url = user_pic($user->uid);
 $user->show = gp('show') ? gp('show') : "unavailable";
 $user->url = "space.php?uid=".$user->uid;
