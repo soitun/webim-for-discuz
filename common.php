@@ -9,15 +9,17 @@ $_SGLOBAL['supe_uid']=  $discuz_uid;
 $_SGLOBAL['db']= $db;
 $_SC['charset'] = UC_CHARSET;
 
+$_SGLOBAL['db']->query("SET NAMES utf8");
+
 $ucdb = new dbstuff;
 $ucdb->charset = UC_DBCHARSET;
 $ucdb->connect(UC_DBHOST, UC_DBUSER, UC_DBPW, UC_DBNAME);
+$ucdb->query("SET NAMES utf8");
 
 if( !function_exists('getspace') ) {
     function getspace($uid) {
-        global $db;
-        $db->query("SET NAMES ". UC_DBCHARSET);
-        $space = $db->fetch_first("SELECT username,gender,nickname FROM "
+        global $_SGLOBAL;
+        $space = $_SGLOBAL['db']->fetch_first("SELECT username,gender,nickname FROM "
                 .tname('members')." m left join "
                 .tname('memberfields')
                 ." mf  on m.uid=mf.uid WHERE m.uid=$uid");
@@ -125,7 +127,6 @@ function buddy($ids) {
     if(empty($ids))return array();
     $ids = join("','", $ids);
     $buddies = array();
-    $_SGLOBAL['db']->query("SET NAMES " . UC_DBCHARSET);
     $q="SELECT main.uid, main.username, f.friendid FROM "
             .UC_DBTABLEPRE
             ."members main LEFT OUTER JOIN "
@@ -157,7 +158,7 @@ function find_new_message() {
     global $_SGLOBAL,$space, $ucdb;
     $uname = $space['username'];
     $messages = array();
-    $ucdb->query("SET NAMES " . UC_DBCHARSET);
+   
     $query = $ucdb->query("SELECT * FROM "
             .im_tname('histories')
             ." WHERE `to`='$uname' and send = 0 ORDER BY timestamp DESC LIMIT 100");
@@ -184,7 +185,6 @@ function new_message_to_histroy() {
 
 function find_history($ids,$type="unicast") {
     global $_SGLOBAL,$space, $ucdb;
-    $ucdb->query("SET NAMES " . UC_DBCHARSET);
     $uname= $space['username'];
     $histories = array();
     $ids = ids_array($ids);
@@ -250,7 +250,7 @@ function avatar($uid, $size='small') {
 }
 }
 function online_buddy() {
-    global $user, $ucdb,$db;
+    global $user, $ucdb,$_SGLOBAL;
     $list = array();
     $buddies=array();
     $q=$ucdb->query("SELECT f.uid,f.friendid, m.username FROM ".UC_DBTABLEPRE."friends f LEFT JOIN ".UC_DBTABLEPRE."members m ON f.friendid=m.uid  WHERE f.uid='$user->uid'");
@@ -258,20 +258,21 @@ function online_buddy() {
         $id=$value['friendid'];
         $buddies[$id]=$value;
     }
+    if(!empty($buddies)){
     $ids=join(",",(array_keys($buddies)));
-    $db->query("SET NAMES ". UC_DBCHARSET);
-    $query = $db->query("SELECT uid,username,groupid FROM ". tname('sessions')." where  uid IN ($ids)");
-    while ($v =$db->fetch_array($query)) {
+    $query = $_SGLOBAL['db']->query("SELECT uid,username,groupid FROM ". tname('sessions')." where  uid IN ($ids)");
+    while ($v =$_SGLOBAL['db']->fetch_array($query)) {
         $list[] = (object)array(
                         "uid" => $v['uid'],
                         "id" => $v['username'],
                         "nick" => $v['username'],
 //                        "group" => $groups[$v['groupid']],
-                        "url" => "home.php?mod=space&uid=".$v['uid'],
+                        "url" => "space.php?uid=".$v['uid'],
                         'default_pic_url' => UC_API.'/images/noavatar_small.gif',
                         "pic_url" => avatar($v['uid'], 'small'),
         );
 
+    }
     }
     return $list;
 }
