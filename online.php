@@ -87,7 +87,7 @@ if(!isset($cache_buddies[$id])){
 $cache_buddies[$id] = (object)array(
 "id" => $id,
 "nick" => $id,
-"need_reload" => true,
+"incomplete" => true,
 );
 }
 $b = $cache_buddies[$id];
