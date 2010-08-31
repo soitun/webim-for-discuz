@@ -2,8 +2,8 @@
 
 $_IMC = array();
 $_IMC["version"] = "@VERSION";//版本
-$_IMC["domain"] = "";//网站注册域名
-$_IMC["apikey"] = "";//网站注册apikey
+$_IMC["domain"] = "www.kehao.com";//网站注册域名
+$_IMC["apikey"] = "69bf0f86-b424-11df-a17e-001a92e5f0be";//网站注册apikey
 $_IMC["host"] = "webim20.cn";//im服务器
 $_IMC["port"] = 8000;//服务端接口端口
 $_IMC["theme"] = "base";//界面主题，根据webim/static/themes/目录内容选择

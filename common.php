@@ -33,7 +33,7 @@ if( !function_exists('tname') ) {
     }
 }
 function setting() {
-    global $_SGLOBAL,$_IMC,$space, $ucdb;
+    global $_SGLOBAL,$space, $ucdb;
     if(!empty($_SGLOBAL['supe_uid'])) {
         $setting  = $ucdb->fetch_array($ucdb->query("SELECT * FROM ".im_tname('settings')." WHERE uid='$_SGLOBAL[supe_uid]'"));
         if(empty($setting)) {
@@ -60,6 +60,15 @@ $user->pic_url = user_pic($user->uid);
 $user->show = gp('show') ? gp('show') : "unavailable";
 $user->url = "space.php?uid=".$user->uid;
 
+
+//Common $ticket
+
+$ticket = gp('ticket');
+if($ticket){
+$ticket = stripslashes($ticket);
+}
+
+
 function to_utf8($s) {
     global $_SC;
     if($_SC['charset'] == 'utf-8') {
@@ -68,16 +77,16 @@ function to_utf8($s) {
         return  _iconv($_SC['charset'],'utf-8',$s);
     }
 }
-////
-////function from_utf8($s) {
-////    global $_SC;
-////    if($_SC['charset'] == 'utf-8') {
-////        return $s;
-////    } else {
-////        return  _iconv('utf-8',$_SC['charset'],$s);
-////    }
-////}
-////
+
+function from_utf8($s) {
+    global $_SC;
+    if($_SC['charset'] == 'utf-8') {
+        return $s;
+    } else {
+        return  _iconv('utf-8',$_SC['charset'],$s);
+    }
+}
+
 ////function to_unicode($s) {
 ////    return preg_replace("/^\"(.*)\"$/","$1",json_encode($s));
 ////}
@@ -90,16 +99,7 @@ function ids_except($id, $ids) {
     }
     return $ids;
 }
-function im_tname($name) {
-    return UC_DBTABLEPRE."webim_".$name;
-}
 
-function build_buddies($buddies) {
-    $_buddies = array();
-    foreach($buddies as $b)
-        $_buddies[]=array('id'=>$b->id,'show'=>$b->show,'need_reload'=>true,'presence'=>$b->presence);
-    return $_buddies;
-}
 
 function complete_status($members){
 	if(!empty($members)){
@@ -119,7 +119,7 @@ function complete_status($members){
 }
 
 function buddy($ids) {
-    global $_SGLOBAL,$_IMC, $groups,$space;
+    global $_SGLOBAL,$space;
     $ids = ids_array($ids);
     $ids = ids_except($space['username'], $ids);
     if(empty($ids))return array();
@@ -141,7 +141,7 @@ function buddy($ids) {
         }else {
             $group = "friend" ;
         }
-        $buddies[]=array('id'=>$id,
+        $buddies[]=(object)array('id'=>$id,
                 'nick'=> $nick,
                 'pic_url' =>user_pic($value['uid']),
                 'status'=>'' ,
@@ -154,7 +154,7 @@ function buddy($ids) {
 }
 
 function find_new_message() {
-    global $_SGLOBAL,$_IMC,$space, $ucdb;
+    global $_SGLOBAL,$space, $ucdb;
     $uname = $space['username'];
     $messages = array();
     $ucdb->query("SET NAMES " . UC_DBCHARSET);
@@ -166,7 +166,7 @@ function find_new_message() {
                 'nick'=>$value['nick'],
                 'from'=>$value['from'],
                 'style'=>$value['style'],
-                'body'=>to_utf8($value['body']),
+                'body'=>$value['body'],
                 'timestamp'=>$value['timestamp'],
                 'type' =>$value['type']));
     }
@@ -174,7 +174,7 @@ function find_new_message() {
 }
 
 function new_message_to_histroy() {
-    global $_SGLOBAL,$_IMC,$space, $ucdb;
+    global $_SGLOBAL,$space, $ucdb;
     $uname = $space['username'];
 //    var_dump("UPDATE ".im_tname('histories')." SET send = 1 WHERE `to`='$uname' AND send = 0");
     $ucdb->query("UPDATE "
@@ -183,7 +183,7 @@ function new_message_to_histroy() {
 }
 
 function find_history($ids,$type="unicast") {
-    global $_SGLOBAL,$_IMC,$space, $ucdb;
+    global $_SGLOBAL,$space, $ucdb;
     $ucdb->query("SET NAMES " . UC_DBCHARSET);
     $uname= $space['username'];
     $histories = array();
@@ -198,13 +198,13 @@ function find_history($ids,$type="unicast") {
             $query = $ucdb->query($q);
             while ($value = $ucdb->fetch_array($query)) {
                 array_unshift($list,
-                        array('to'=>to_utf8($value['to']),
-                        'from'=>to_utf8($value['from']),
+                        array('to'=>$value['to'],
+                        'from'=>$value['from'],
                         'style'=>$value['style'],
-                        'body'=>to_utf8($value['body']),
+                        'body'=>$value['body'],
                         'timestamp'=>$value['timestamp'],
                         'type' =>$value['type'],
-                        'nick'=>to_utf8($value['nick'])));
+                        'nick'=>$value['nick']));
             }
         }else{
             $q=  "SELECT main.* FROM "
@@ -213,11 +213,11 @@ function find_history($ids,$type="unicast") {
             $query = $ucdb->query($q);
             while ($value = $ucdb->fetch_array($query)) {
                 array_unshift($list,
-                        array('to'=>to_utf8($value['to']),
-                        'nick'=>to_utf8($value['nick']),
-                        'from'=>to_utf8($value['from']),
+                        array('to'=>$value['to'],
+                        'nick'=>$value['nick'],
+                        'from'=>$value['from'],
                         'style'=>$value['style'],
-                        'body'=>to_utf8($value['body']),
+                        'body'=>$value['body'],
                         'type' => $value['type'],
                         'timestamp'=>$value['timestamp']));
             }
@@ -230,10 +230,48 @@ function find_history($ids,$type="unicast") {
 function nick($sp){
     global $_IMC;
     $_nick=(!$_IMC['show_realname']||empty($sp['name'])) ? $sp['username'] : $sp['name'];
-    return to_unicode(to_utf8(($_nick)));
+    return to_utf8($_nick);
 }
 
 function tname($name) {
     global $tablepre;
     return $tablepre.$name;
+}
+
+ function im_tname($name) {
+// return "`webim_".$name."`";
+    return UC_DBTABLEPRE."webim_".$name;
+}
+
+
+if( !function_exists('avatar') ) {
+function avatar($uid, $size='small') {
+		return UC_API.'/avatar.php?uid='.$uid.'&size='.$size;
+}
+}
+function online_buddy() {
+    global $user, $ucdb,$db;
+    $list = array();
+    $buddies=array();
+    $q=$ucdb->query("SELECT f.uid,f.friendid, m.username FROM ".UC_DBTABLEPRE."friends f LEFT JOIN ".UC_DBTABLEPRE."members m ON f.friendid=m.uid  WHERE f.uid='$user->uid'");
+    while ($value =$ucdb->fetch_array($q)) {
+        $id=$value['friendid'];
+        $buddies[$id]=$value;
+    }
+    $ids=join(",",(array_keys($buddies)));
+    $db->query("SET NAMES ". UC_DBCHARSET);
+    $query = $db->query("SELECT uid,username,groupid FROM ". tname('sessions')." where  uid IN ($ids)");
+    while ($v =$db->fetch_array($query)) {
+        $list[] = (object)array(
+                        "uid" => $v['uid'],
+                        "id" => $v['username'],
+                        "nick" => $v['username'],
+//                        "group" => $groups[$v['groupid']],
+                        "url" => "home.php?mod=space&uid=".$v['uid'],
+                        'default_pic_url' => UC_API.'/images/noavatar_small.gif',
+                        "pic_url" => avatar($v['uid'], 'small'),
+        );
+
+    }
+    return $list;
 }
