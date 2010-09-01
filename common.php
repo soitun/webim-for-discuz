@@ -209,7 +209,7 @@ function find_history($ids,$type="unicast") {
         }else{
             $q=  "SELECT main.* FROM "
                     . im_tname('histories')
-                    . " main WHERE (`send`=1) AND ((`to`='$id' AND `from`='$uname' AND `fromdel` != 1) or (`from`='$id' AND `to`='$uname' AND `todel` != 1))  ORDER BY timestamp DESC LIMIT 30";
+                    . " main WHERE ((`to`='$id' AND `from`='$uname' AND `fromdel` != 1) or (`from`='$id' AND `to`='$uname' AND `todel` != 1 AND `send`=1))  ORDER BY timestamp DESC LIMIT 30";
             $query = $ucdb->query($q);
             while ($value = $ucdb->fetch_array($query)) {
                 array_unshift($list,
