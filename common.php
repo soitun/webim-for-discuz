@@ -141,7 +141,6 @@ function buddy($names, $uids = null) {
 		WHERE m.uid <> $user->uid AND $where_sql";
 	$query = $_SGLOBAL['db']-> query($q);
 	while ($value = $_SGLOBAL['db']->fetch_array($query)) {
-		//                realname_set($value['uid'], to_utf8($value['username']));
 		$id = $value['username'];
 		$nick = nick($value);
 		if(empty($value['friendid'])) {
@@ -240,7 +239,7 @@ function log_item($value){
 function nick($sp){
 	global $_IMC;
 	$_nick=(!$_IMC['show_realname']||empty($sp['name'])) ? $sp['username'] : $sp['name'];
-	return to_utf8($_nick);
+	return $_nick;
 }
 
 function tname($name) {
