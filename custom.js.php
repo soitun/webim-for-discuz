@@ -58,6 +58,9 @@ $setting = json_encode(setting());
 	ui.addApp("room");
 	ui.addApp("notification");
 	ui.addApp("setting", {"data": webim.setting.defaults.data});
+	if(<?php echo var_export(!$_IMC['disable_chatlink']) ?>)ui.addApp("chatlink", {
+		link_wrap: document.getElementById("profilecontent")
+	});
 	ui.render();
         im.autoOnline() && im.online();
 
